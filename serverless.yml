@@ -1,11 +1,56 @@
-service: websocket-server
+service: websocket-chat-server
 
 provider:
   name: aws
   runtime: nodejs10.x
   stage: dev
   region: ap-southeast-1
+  websocketsApiRouteSelectionExpression: $request.body.action
+
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 functions:
-  hello:
-    handler: src/handler.hello
+  sendMessage:
+    handler: src/handler.sendMessage
+    events:
+      - websocket: $default
+  # start:
+  #   handler: src/connect.start
+  #   events:
+  #     - websocket: $connect
+
+resources:
+  Resources:
+    ChatRoomTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: chatId
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: chatId
+            KeyType: HASH
+          -
+            AttributeName: timestamp
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
