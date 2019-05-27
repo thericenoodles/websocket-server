@@ -1,37 +1,33 @@
 'use strict';
 
-const AWS = require('aws-sdk')
-const util = require('util')
+const AWS = require('aws-sdk');
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-module.exports.start = async (event) => {
-  const domain = event.requestContext.domainName;
-  const stage  = event.requestContext.stage;
-  const connectionId = event.requestContext.connectionId;
-  const pushUrl = util.format("https://%s/%s", domain, stage);
+module.exports.connect = async (event) => {
+    const connectionId = event.requestContext.connectionId;
 
-  try {
+    console.log("connect");
+    const params = {
+      TableName: process.env.DYNAMODB_TABLE,
+      Item: {
+          chatId: "defaultchatid",
+          connectionId:  connectionId,
+          timestamp: Math.floor(new Date() / 1000)
+      }
+    };
+
     await new Promise((resolve, reject) => {
-      const connectionGateway = new AWS.ApiGatewayManagementApi({'apiVersion': '2029', endpoint: pushUrl});
-      connectionGateway.postToConnection({
-        ConnectionId: connectionId,
-        Data: `#${connectionId} connected to chat`
-      }, (err, data) => {
-        if (err) {
-          console.log('some error');
-          console.log(err);
-          reject(err);
+      dynamoDb.put(params, (error) => {
+        if(error) {
+          reject(error);
         }
-  
-        resolve(data);
-      })
-    });
-  } catch (e) {
-    console.log(e);
-    throw new Error(e);
-  }
 
-  return {
-    statusCode: 200
-  };
+        resolve();  
+      });
+    }).catch(error => console.log(error));
+
+    return {
+      statusCode: 200
+    };
 
 };

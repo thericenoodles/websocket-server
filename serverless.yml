@@ -22,35 +22,20 @@ provider:
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 functions:
-  sendMessage:
-    handler: src/handler.sendMessage
-    events:
-      - websocket: $default
-  # start:
-  #   handler: src/connect.start
+  # sendMessage:
+  #   handler: src/handler.sendMessage
   #   events:
-  #     - websocket: $connect
+  #     - websocket: $default
+  connect:
+    handler: src/connect.connect
+    events:
+      - websocket: $connect
 
-resources:
-  Resources:
-    ChatRoomTable:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: chatId
-            AttributeType: S
-          - AttributeName: timestamp
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: chatId
-            KeyType: HASH
-          -
-            AttributeName: timestamp
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+  disconnect:
+    handler: src/disconnect.disconnect
+    events:
+      - websocket: $disconnect
+
+package:
+  exclude:
+    - 'node_modules/**'

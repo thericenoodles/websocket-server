@@ -9,8 +9,8 @@ module.exports.sendMessage = async (event) => {
   const domain = event.requestContext.domainName;
   const stage  = event.requestContext.stage;
   const connectionId = event.requestContext.connectionId;
-  const pushUrl = util.format(util.format("https://%s/%s", domain, stage));
-  // const pushUrl = `https://${domain}/${stage}`;
+  // const pushUrl = util.format(util.format("https://%s/%s", domain, stage));
+  const pushUrl = `https://${domain}/${stage}`;
 
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
