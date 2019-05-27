@@ -22,10 +22,7 @@ provider:
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 functions:
-  # sendMessage:
-  #   handler: src/handler.sendMessage
-  #   events:
-  #     - websocket: $default
+
   connect:
     handler: src/connect.connect
     events:
@@ -35,6 +32,17 @@ functions:
     handler: src/disconnect.disconnect
     events:
       - websocket: $disconnect
+      
+  default:
+    handler: src/handler.default
+    events:
+      - websocket: $default
+
+  sendMessage:
+    handler: src/sendMessage.sendMessage
+    events:
+      - websocket: 
+          route: sendMessage
 
 package:
   exclude:
