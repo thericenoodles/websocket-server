@@ -1,6 +1,7 @@
 'use strict';
 
-const AWS = require('aws-sdk')
+const AWS = require('aws-sdk');
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.disconnect = async (event) => {
     const connectionId = event.requestContext.connectionId;
