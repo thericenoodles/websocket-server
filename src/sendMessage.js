@@ -2,14 +2,12 @@
 
 const AWS = require('aws-sdk');
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
-require('./patch.js');
 
 module.exports.sendMessage = async (event) => {
     const responseData = JSON.parse(event.body);
     const domain = event.requestContext.domainName;
     const stage  = event.requestContext.stage;
     const connectionId = event.requestContext.connectionId;
-    // const pushUrl = util.format(util.format("https://%s/%s", domain, stage));
     const pushUrl = `https://${domain}/${stage}`;
 
     const queryParams = {
